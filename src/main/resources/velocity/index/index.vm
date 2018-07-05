@@ -1,0 +1,35 @@
+#parse("/velocity/layout.vm")
+#@mainLayout()
+    <div class="login-wrapper">
+        <h2>$msg.get("LOGIN_HEADING")</h2>
+        <form method="post" action="" class="auth-form"  id="loginForm">
+            <input type="hidden" name="action" value="AUTH" />
+            <input type="hidden" name="loginRedirect" value="/index/" />
+            <div class="incomingMessage"></div>
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                <input class="mdl-textfield__input" id="login" type="text" name="username">
+                <label class="mdl-textfield__label" for="login">$msg.get("LOGIN_LABEL_USERNAME")</label>
+            </div>
+            <br />
+            <input class="auth mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="submit" value="$msg.get("LOGIN_BUTTON_LOGIN")">
+        </form>
+    </div>
+    <canvas id="game-field" class="game-field">
+    </canvas>
+    <div class="game-board">
+        <div class="material-icons mdl-badge mdl-badge--overlap" data-badge="0">favorite</div>
+        <div class="material-icons mdl-badge mdl-badge--overlap" data-badge="0">attach_money</div>
+    </div>
+    <div class="game-user-list">
+        <ul class="demo-list-icon mdl-list">
+        #foreach($user in $users)
+          <li class="mdl-list__item">
+            <span class="mdl-list__item-primary-content">
+                <i class="material-icons mdl-list__item-icon">person</i>
+                $user.getUserName()
+            </span>
+          </li>
+        #end
+        </ul>
+    </div>
+#end
