@@ -1,13 +1,8 @@
+var tanks = [];
+
 class Service {
 
-    static tanks() {
-        if (!Service.tanks) {
-            Service.tanks = [];
-        }
-    }
-
     static controller(data) {
-      Service.tanks();
       switch (data["action"]) {
         case "AUTH":
             $(".incomingMessage").html("");
@@ -21,20 +16,20 @@ class Service {
             break;
         case "GAMESTATUS":
             if (username != data["username"]) {
-                if (!Service.tanks[data["username"]]) {
-                    addNewTank(data["username"]);
-                    Service.tanks[data["username"]].x = data["x"];
-                    Service.tanks[data["username"]].y = data["y"];
+                if (!tanks[data["username"]]) {
+                    Service.addNewTank(data["username"]);
+                    tanks[data["username"]].x = data["x"];
+                    tanks[data["username"]].y = data["y"];
                 }
-                var dx = - Service.tanks[data["username"]].x + data["x"];
+                var dx = - tanks[data["username"]].x + data["x"];
                 if (dx != 0) {
                     dx = dx / Math.abs(dx);
                 }
-                var dy = - Service.tanks[data["username"]].y + data["y"];
+                var dy = - tanks[data["username"]].y + data["y"];
                 if (dy != 0) {
                     dy = dy / Math.abs(dy);
                 }
-                Service.tanks[data["username"]].move(dx, dy);
+                tanks[data["username"]].move(dx, dy);
             }
             break;
         case "NEWUSER":
@@ -58,33 +53,35 @@ class Service {
     }
 
     static addNewTank(username) {
-        Service.tanks[username] = new Tank(username);
-        Service.tanks[username].draw();
+        tanks[username] = new Tank(username);
+        tanks[username].draw();
     }
 
     static keyPress(username, keyCode) {
-        Service.tanks();
         switch (keyCode) {
             case 37:
-                Service.tanks[username].move(-1, 0);
+                tanks[username].move(-1, 0);
                 break;
             case 39:
-                Service.tanks[username].move(1, 0);
+                tanks[username].move(1, 0);
                 break;
             case 40:
-                Service.tanks[username].move(0, 1);
+                tanks[username].move(0, 1);
                 break;
             case 38:
-                Service.tanks[username].move(0, -1);
+                tanks[username].move(0, -1);
                 break;
             case 17:
                 break;
         }
+        //TODO избавиться от магического числа
+        $("body").scrollLeft(tanks[username].x - 300);
+        $("body").scrollTop(tanks[username].y - 300);
         var responce = {};
         responce.action = "GAMESTATUS";
         responce.username = username;
-        responce.x = Service.tanks[username].x;
-        responce.y = Service.tanks[username].y;
+        responce.x = tanks[username].x;
+        responce.y = tanks[username].y;
         return responce;
     }
 }

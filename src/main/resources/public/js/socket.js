@@ -42,7 +42,7 @@ $(document).ready(function(){
         return false;
     });
 
-    $("body").on("keypress", function (event){
+    $("body").on("keydown", function (event){
         sendData(JSON.stringify(Service.keyPress(username, event.keyCode)));
     });
 });

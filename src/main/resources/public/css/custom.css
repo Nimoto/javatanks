@@ -32,12 +32,12 @@ form div {
 }
 
 .game-field {
-    width: 900px;
-    height: 500px;
+    width: 2000px;
+    height: 2000px;
     border: 1px solid #ccc;
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: 0px;
+    left: 0px;
     display: none;
     /*background: rgba(255, 255, 255, 0.5);*/
 }

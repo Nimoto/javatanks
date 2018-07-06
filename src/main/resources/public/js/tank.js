@@ -1,8 +1,8 @@
 class Tank {
 
     constructor(username) {
-        this.x = 30;
-        this.y = 30;
+        this.x = 300;
+        this.y = 300;
         this.username = username;
         this.scheme = this.tankUp();
     }
@@ -15,11 +15,11 @@ class Tank {
     }
 
     dx() {
-        return 5;
+        return 10;
     }
 
     dy() {
-        return 5;
+        return 10;
     }
 
     draw() {
@@ -32,7 +32,7 @@ class Tank {
                 x = parseInt(this.x) + i * dx;
                 y = parseInt(this.y) + j * dy;
                 if (this.scheme[i][j] == 1) {
-                  context.fillRect(x, y, (dx - 1), (dy - 1));
+                  context.fillRect(x, y, (dx - 2), (dy - 2));
                   context.stroke();
                 }
             }
@@ -43,13 +43,13 @@ class Tank {
         var context = Tank.context();
 
         var x, y;
-        var dx = 5, dy = 5;
+        var dx = this.dx(), dy = this.dy();
         for(var i = 0; i < 3; i++) {
             for(var j = 0; j < 3; j++) {
                 x = parseInt(this.x) + i * dx;
                 y = parseInt(this.y) + j * dy;
                 if (this.scheme[i][j] == 1) {
-                  context.clearRect(x, y, (dx - 1), (dy - 1));
+                  context.clearRect(x, y, (dx - 2), (dy - 2));
                   context.stroke();
                 }
             }

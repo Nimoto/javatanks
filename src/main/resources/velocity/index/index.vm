@@ -14,7 +14,7 @@
             <input class="auth mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="submit" value="$msg.get("LOGIN_BUTTON_LOGIN")">
         </form>
     </div>
-    <canvas id="game-field" class="game-field">
+    <canvas width="2000" height="2000" id="game-field" class="game-field">
     </canvas>
     <div class="game-board">
         <div class="material-icons mdl-badge mdl-badge--overlap" data-badge="0">favorite</div>
