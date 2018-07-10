@@ -8,9 +8,11 @@
         <script src="https://code.jquery.com/jquery-3.3.1.min.js"
                 integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
                 crossorigin="anonymous"></script>
+        <script defer src="/js/shout.js"></script>
         <script defer src="/js/tank.js"></script>
         <script defer src="/js/service.js"></script>
         <script defer src="/js/socket.js"></script>
+        <script defer src="/js/main.js"></script>
         <link rel="stylesheet" href="/css/material.min.css" />
         <link rel="stylesheet" href="/css/custom.css" />
     </head>

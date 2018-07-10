@@ -5,6 +5,9 @@ class Tank {
         this.y = 300;
         this.username = username;
         this.scheme = this.tankUp();
+        this.direction = {x: 0, y: -1};
+        this.shoutDirection = {x: 0, y: -1};
+        this.shoutPosition = {x: 310, y: 290};
     }
 
     static context() {
@@ -59,26 +62,39 @@ class Tank {
     shoot() {
     }
 
-    move(directionX, directionY) {
-        this.erase();
+    move(directionX, directionY, isDraw = true) {
+        if (isDraw == true) {
+            this.erase();
+        }
         switch (directionX + ", " + directionY) {
             case "0, 1" :
-                this.scheme = this.tankUp();
+                this.scheme = this.tankDown();
+                this.shoutPosition = {x: this.x + this.dx(), y: this.y + this.dy() * 4};
+                this.shoutDirection = {x: directionX, y: directionY};
                 break;
             case "0, -1" :
-                this.scheme = this.tankDown();
+                this.scheme = this.tankUp();
+                this.shoutPosition = {x: this.x + this.dx(), y: this.y - this.dy() * 2};
+                this.shoutDirection = {x: directionX, y: directionY};
                 break;
             case "1, 0" :
                 this.scheme = this.tankRight();
+                this.shoutPosition = {x: this.x + this.dx() * 4, y: this.y + this.dy()};
+                this.shoutDirection = {x: directionX, y: directionY};
                 break;
             case "-1, 0" :
                 this.scheme = this.tankLeft();
+                this.shoutPosition = {x: this.x - this.dx() * 2, y: this.y + this.dy()};
+                this.shoutDirection = {x: directionX, y: directionY};
                 break;
         }
-        var dx = this.dx(), dy = this.dy();
-        this.x = this.x + dx * directionX;
-        this.y = this.y + dy * directionY;
-        this.draw();
+        this.direction.x = directionX;
+        this.direction.y = directionY;
+        this.x = this.x + this.dx() * directionX;
+        this.y = this.y + this.dy() * directionY;
+        if (isDraw == true) {
+            this.draw();
+        }
     }
 
     die() {
@@ -92,11 +108,11 @@ class Tank {
         return [[1,0,1],[1,1,1],[0,1,0], [2,1,0]];
     }
 
-    tankUp() {
+    tankDown() {
         return [[1,1,0],[0,1,1],[1,1,0], [1,2,0]];
     }
 
-    tankDown() {
+    tankUp() {
         return [[0,1,1],[1,1,0],[0,1,1], [1,0,0]];
     }
 }
