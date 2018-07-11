@@ -5,7 +5,7 @@ import org.eclipse.jetty.websocket.api.Session;
 public class User {
     private int lifes = 5;
     private int score = 0;
-    private String userName;
+    private final String userName;
     private Session session;
 
     public User(String userName) {
