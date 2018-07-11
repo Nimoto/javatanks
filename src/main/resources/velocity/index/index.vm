@@ -17,8 +17,8 @@
     <canvas width="2000" height="2000" id="game-field" class="game-field">
     </canvas>
     <div class="game-board">
-        <div class="material-icons mdl-badge mdl-badge--overlap" data-badge="0">favorite</div>
-        <div class="material-icons mdl-badge mdl-badge--overlap" data-badge="0">attach_money</div>
+        <div class="material-icons mdl-badge mdl-badge--overlap lifes" data-badge="0">favorite</div>
+        <div class="material-icons mdl-badge mdl-badge--overlap score" data-badge="0">attach_money</div>
     </div>
     <div class="game-user-list">
         <ul class="demo-list-icon mdl-list">

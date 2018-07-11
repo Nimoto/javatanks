@@ -1,15 +1,18 @@
 var tanks = [];
 var shouts = [];
-var username;
+var currentUsername;
 
 class Service {
 
     static controller(data) {
+      console.log(data);
       switch (data["action"]) {
         case "AUTH":
             $(".incomingMessage").html("");
+            $(".lifes").attr("data-badge", data["lifes"]);
+            $(".score").attr("data-badge", data["score"]);
             if (data["status"] == "success") {
-                username = $("#login").val();
+                currentUsername = $("#login").val();
                 $(".login-wrapper").hide();
                 $(".game-field").show();
             } else {
@@ -17,7 +20,7 @@ class Service {
             }
             break;
         case "MOVEMENT":
-            if (username != data["username"]) {
+            if (currentUsername != data["username"]) {
                 if (!tanks[data["username"]]) {
                     Service.addNewTank(data["username"]);
                     tanks[data["username"]].x = data["x"];
@@ -35,11 +38,26 @@ class Service {
             }
             break;
         case "NEWUSER":
-            Service.addNewUserInTable(data["username"]);
+            //Service.addNewUserInTable(data["username"]);
             Service.addNewTank(data["username"]);
             break;
         case "SHOUT":
-            Service.addShout(data["username"]);
+            if (currentUsername != data["username"]) {
+                Service.addShout(data["username"]);
+            }
+        case "HURT_YOU":
+            $(".lifes").attr("data-badge", data["lifes"]);
+            break;
+        case "SCORE":
+            $(".score").attr("data-badge", data["score"]);
+            break;
+        case "KILL":
+            if (data["username"] == currentUsername) {
+                $(".lifes").attr("data-badge", "0");
+                alert("You die!");
+            }
+            tanks[data["username"]].erase();
+            delete tanks[data["username"]];
         default:
             console.log("unknown situation");
       }
@@ -98,9 +116,11 @@ class Service {
         var tank = tanks[username];
         var shout = new Shout(tank);
         var responce = {};
-        responce.action = "SHOUT";
-        responce.username = shout.username;
-        Socket.sendData(JSON.stringify(responce));
+        if (username != currentUsername) {
+            responce.action = "SHOUT";
+            responce.username = shout.username;
+            Socket.sendData(JSON.stringify(responce));
+        }
         shout.interval = window.setInterval(function() {
             shout.move(shout.direction.x, shout.direction.y);
             for (var key in tanks) {
@@ -112,13 +132,11 @@ class Service {
                     responce.username = shout.username;
                     responce.victim = key;
                     Socket.sendData(JSON.stringify(responce));
-                } else if {
-                    (
+                } else if (
                         shout.x <= 0 ||
                         shout.x >= $(".game-field").width() ||
                         shout.y <= 0 ||
                         shout.y >= $(".game-field").height()
-                    )
                 ) {
                     shout.erase();
                     clearInterval(shout.interval);
@@ -127,8 +145,8 @@ class Service {
         }, 10);
     }
 
-    static keyPress(username, keyCode) {
-
+    static keyPress(keyCode) {
+        var username = currentUsername;
         var dx = 0, dy = 0;
         if (tanks[username]) {
             switch (keyCode) {

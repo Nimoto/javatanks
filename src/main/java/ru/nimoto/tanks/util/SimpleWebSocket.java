@@ -24,6 +24,8 @@ enum Command {
 @WebSocket
 public class SimpleWebSocket {
 
+    private String userName;
+
     // Store sessions if you want to, for example, broadcast a message to all users
     private static final Queue<Session> sessions = new ConcurrentLinkedQueue<>();
 
@@ -35,7 +37,9 @@ public class SimpleWebSocket {
     @OnWebSocketClose
     public void closed(Session session, int statusCode, String reason) {
         sessions.remove(session);
-        UserController.deleteUser(session);
+        if (!userName.isEmpty()) {
+            UserController.deleteUser(userName);
+        }
     }
 
     @OnWebSocketMessage
@@ -51,7 +55,10 @@ public class SimpleWebSocket {
             case AUTH:
                 responce.put("action", "AUTH");
                 if (UserController.setUser(session, data.get("username").toString())) {
+                    userName = data.get("username").toString();
                     responce.put("status", "success");
+                    responce.put("score", "0");
+                    responce.put("lifes", "5");
                     //TODO: удалить после внедрения сортировки по score
                     HashMap<String, String> broadcastResponce = new HashMap<>();
                     broadcastResponce.put("action", "NEWUSER");
@@ -69,6 +76,7 @@ public class SimpleWebSocket {
                     responce.put("message", "Try another login");
                 }
                 session.getRemote().sendString(String.valueOf(new JSONObject(responce)));
+                responce.clear();
                 break;
             case MOVEMENT:
                 sessions.stream().filter(Session::isOpen).forEach(sess -> {
@@ -89,13 +97,31 @@ public class SimpleWebSocket {
                 });
                 break;
             case HURT:
-                sessions.stream().filter(Session::isOpen).forEach(sess -> {
-                    try {
-                        sess.getRemote().sendString(message);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
+                int victimLifes = UserController.hurtUser(data.get("victim").toString());
+                int userScores = UserController.scoreUser(data.get("username").toString());
+                if (victimLifes == 0) {
+                    responce.put("action", "KILL");
+                    responce.put("username", data.get("victim").toString());
+                    sessions.stream().filter(Session::isOpen).forEach(sess -> {
+                        try {
+                            sess.getRemote().sendString(String.valueOf(new JSONObject(responce)));
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    responce.clear();
+
+                    responce.put("action", "SCORE");
+                    responce.put("score", String.valueOf(userScores));
+                    responce.clear();
+                } else {
+                    responce.put("action", "HURT_YOU");
+                    responce.put("lifes", String.valueOf(victimLifes));
+
+                    UserController.getUser(data.get("victim").toString())
+                            .getSession().getRemote().sendString(String.valueOf(new JSONObject(responce)));
+                }
+                responce.clear();
                 break;
         }
     }
