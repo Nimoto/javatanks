@@ -116,7 +116,8 @@ class Service {
         var tank = tanks[username];
         var shout = new Shout(tank);
         var responce = {};
-        if (username != currentUsername) {
+        console.log(username + " " + currentUsername);
+        if (username == currentUsername) {
             responce.action = "SHOUT";
             responce.username = shout.username;
             Socket.sendData(JSON.stringify(responce));
