@@ -1,13 +1,14 @@
 class Tank {
 
-    constructor(username) {
-        this.x = 300;
-        this.y = 300;
+    constructor(username, x = 300, y = 300) {
+        this.x = x;
+        this.y = y;
         this.username = username;
         this.scheme = this.tankUp();
         this.direction = {x: 0, y: -1};
         this.shoutDirection = {x: 0, y: -1};
         this.shoutPosition = {x: 310, y: 290};
+        this.isNew = true;
     }
 
     static context() {
@@ -23,6 +24,21 @@ class Tank {
 
     dy() {
         return 10;
+    }
+
+    setIsNew (value) {
+        this.isNew = value;
+    }
+
+    static changeStatus(tank) {
+        window.setTimeout(function() {
+            tank.isNew = false;
+            console.log(this.isNew);
+        }, 3000);
+    }
+
+    checkStatus() {
+        return this.isNew;
     }
 
     draw() {

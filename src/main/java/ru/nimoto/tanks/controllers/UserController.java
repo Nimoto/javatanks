@@ -1,11 +1,9 @@
 package ru.nimoto.tanks.controllers;
 
-import ru.nimoto.tanks.models.*;
-import ru.nimoto.tanks.models.User;
 import org.eclipse.jetty.websocket.api.Session;
+import ru.nimoto.tanks.models.User;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 public class UserController {
 

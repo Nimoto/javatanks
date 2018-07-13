@@ -9,22 +9,29 @@ class Service {
       switch (data["action"]) {
         case "AUTH":
             $(".incomingMessage").html("");
-            $(".lifes").attr("data-badge", data["lifes"]);
-            $(".score").attr("data-badge", data["score"]);
             if (data["status"] == "success") {
+                tanks = JSON.parse(data["tanks"]);
+                console.log(tanks);
+                $(".lifes").attr("data-badge", data["lifes"]);
+                $(".score").attr("data-badge", data["score"]);
                 currentUsername = $("#login").val();
+                for (var key in tanks) {
+                    Service.addTank(key, tanks[key]["x"], tanks[key]["y"]);
+                }
+                Service.addNewTank(currentUsername, true);
                 $(".login-wrapper").hide();
                 $(".game-field").show();
             } else {
                 $(".incomingMessage").html(data["message"]);
             }
             break;
+        case "TANK":
+            Service.addTank(data["username"], data["x"], data["y"]);
+            break;
         case "MOVEMENT":
             if (currentUsername != data["username"]) {
                 if (!tanks[data["username"]]) {
-                    Service.addNewTank(data["username"]);
-                    tanks[data["username"]].x = data["x"];
-                    tanks[data["username"]].y = data["y"];
+                    Service.addTank(data["username"], data["x"], data["y"]);
                 }
                 var dx = - tanks[data["username"]].x + data["x"];
                 if (dx != 0) {
@@ -37,9 +44,10 @@ class Service {
                 tanks[data["username"]].move(dx, dy);
             }
             break;
-        case "NEWUSER":
-            //Service.addNewUserInTable(data["username"]);
-            Service.addNewTank(data["username"]);
+        case "NEW_TANK":
+            if (data["username"] != currentUsername) {
+                Service.addNewTank(data["username"], false, data["x"], data["y"]);
+            }
             break;
         case "SHOUT":
             if (currentUsername != data["username"]) {
@@ -63,20 +71,51 @@ class Service {
       }
     }
 
-    static addNewUserInTable(username) {
-        $(".game-user-list ul").append(
-              "<li class=\"mdl-list__item\">" +
-                "<span class=\"mdl-list__item-primary-content\">" +
-                    "<i class=\"material-icons mdl-list__item-icon\">person</i>" +
-                    username +
-                "</span>" +
-              "</li>"
-        );
+    static addTank(username, x, y) {
+        tanks[username] = new Tank(username, x, y);
+        tanks[username].setIsNew(false);
+        tanks[username].draw();
     }
 
-    static addNewTank(username) {
-        tanks[username] = new Tank(username);
+    static addNewTank(username, isCurrent = false, startX = false, startY = false) {
+        if (startX != false && startY != false) {
+            tanks[username] = new Tank(username, startX, startY);
+        } else {
+            tanks[username] = new Tank(username);
+        }
+        if (isCurrent) {
+            var x = 50, y = 50;
+            while (!Service.isTanksIntersection(tanks[username]) && x < $(".game-field").width() - 50) {
+                y += tanks[username].dy();
+                if (y >= $(".game-field").height() - 50) {
+                    y = 50;
+                    x += tanks[username].dx();
+                }
+                tanks[username].x = x;
+                tanks[username].y = y;
+            }
+            var responce = tanks[username];
+            responce.action = "NEW_TANK";
+            Socket.sendData(JSON.stringify(responce));
+        }
+
+        Tank.changeStatus(tanks[username]);
         tanks[username].draw();
+        var flag = false;
+        tanks[username].interval = window.setInterval(function() {
+            if (tanks[username].checkStatus() == false) {
+                clearInterval(tanks[username].interval);
+                tanks[username].erase();
+                tanks[username].draw();
+            } else {
+                if (flag) {
+                    tanks[username].draw();
+                } else {
+                    tanks[username].erase();
+                }
+                flag = !flag;
+            }
+        }, 250);
     }
 
     static pointInTank(point, tank) {
@@ -113,37 +152,43 @@ class Service {
     }
 
     static addShout(username) {
+        console.log("1");
         var tank = tanks[username];
-        var shout = new Shout(tank);
-        var responce = {};
-        console.log(username + " " + currentUsername);
-        if (username == currentUsername) {
-            responce.action = "SHOUT";
-            responce.username = shout.username;
-            Socket.sendData(JSON.stringify(responce));
-        }
-        shout.interval = window.setInterval(function() {
-            shout.move(shout.direction.x, shout.direction.y);
-            for (var key in tanks) {
-                if (Service.pointInTank({x: shout.x, y: shout.y}, tanks[key])) {
-                    shout.erase();
-                    clearInterval(shout.interval);
-                    var responce = {};
-                    responce.action = "HURT";
-                    responce.username = shout.username;
-                    responce.victim = key;
-                    Socket.sendData(JSON.stringify(responce));
-                } else if (
-                        shout.x <= 0 ||
-                        shout.x >= $(".game-field").width() ||
-                        shout.y <= 0 ||
-                        shout.y >= $(".game-field").height()
-                ) {
-                    shout.erase();
-                    clearInterval(shout.interval);
-                }
+        if (!tank.checkStatus()) {
+            var shout = new Shout(tank);
+            var responce = {};
+            if (username == currentUsername) {
+                responce.action = "SHOUT";
+                responce.username = shout.username;
+                Socket.sendData(JSON.stringify(responce));
             }
-        }, 10);
+            shout.interval = window.setInterval(function() {
+                console.log("2");
+                shout.move(shout.direction.x, shout.direction.y);
+                for (var key in tanks) {
+                    if (!tanks[key].checkStatus() && Service.pointInTank({x: shout.x, y: shout.y}, tanks[key])) {
+                        shout.erase();
+                        clearInterval(shout.interval);
+                        if (key == currentUsername) {
+                            var responce = {};
+                            responce.action = "HURT";
+                            console.log("3");
+                            responce.username = shout.username;
+                            responce.victim = key;
+                            Socket.sendData(JSON.stringify(responce));
+                        }
+                    } else if (
+                            shout.x <= 0 ||
+                            shout.x >= $(".game-field").width() ||
+                            shout.y <= 0 ||
+                            shout.y >= $(".game-field").height()
+                    ) {
+                        shout.erase();
+                        clearInterval(shout.interval);
+                    }
+                }
+            }, 10);
+        }
     }
 
     static keyPress(keyCode) {
@@ -180,13 +225,10 @@ class Service {
                     break;
             }
 
-            var tank = new Tank(username);
-            tank.x = tanks[username].x;
-            tank.y = tanks[username].y;
+            var tank = new Tank(username, tanks[username].x, tanks[username].y);
             tank.move(dx, dy, false);
             if (Service.isTanksIntersection(tank) == true) {
                 tanks[username].move(dx, dy);
-                //TODO избавиться от магического числа
                 $("body").scrollLeft(tanks[username].x - 300);
                 $("body").scrollTop(tanks[username].y - 300);
                 var responce = {};

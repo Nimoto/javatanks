@@ -16,6 +16,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 enum Command {
     MOVEMENT,
+    NEW_TANK,
     SHOUT,
     HURT,
     AUTH
@@ -24,10 +25,10 @@ enum Command {
 @WebSocket
 public class SimpleWebSocket {
 
-    private String userName;
-
     // Store sessions if you want to, for example, broadcast a message to all users
     private static final Queue<Session> sessions = new ConcurrentLinkedQueue<>();
+    private static HashMap<String, HashMap<String, Object>> tanks = new HashMap<String, HashMap<String, Object>>();
+    private String userName;
 
     @OnWebSocketConnect
     public void connected(Session session) throws IOException {
@@ -51,6 +52,7 @@ public class SimpleWebSocket {
         }
         Command action = Command.valueOf(data.get("action").toString());
         HashMap<String, String> responce = new HashMap<>();
+        HashMap<String, String> tank = new HashMap<>();
         switch (action) {
             case AUTH:
                 responce.put("action", "AUTH");
@@ -59,17 +61,7 @@ public class SimpleWebSocket {
                     responce.put("status", "success");
                     responce.put("score", "0");
                     responce.put("lifes", "5");
-                    //TODO: удалить после внедрения сортировки по score
-                    HashMap<String, String> broadcastResponce = new HashMap<>();
-                    broadcastResponce.put("action", "NEWUSER");
-                    broadcastResponce.put("username", data.get("username").toString());
-                    sessions.stream().filter(Session::isOpen).forEach(sess -> {
-                        try {
-                            sess.getRemote().sendString(String.valueOf(new JSONObject(broadcastResponce)));
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
+                    responce.put("tanks", String.valueOf(new JSONObject(tanks)));
                 } else {
                     responce.put("status", "fail");
                     //TODO MessageBundle
@@ -78,7 +70,18 @@ public class SimpleWebSocket {
                 session.getRemote().sendString(String.valueOf(new JSONObject(responce)));
                 responce.clear();
                 break;
+            case NEW_TANK:
+                tanks.put(data.get("username").toString(), data);
+                sessions.stream().filter(Session::isOpen).forEach(sess -> {
+                    try {
+                        sess.getRemote().sendString(String.valueOf(new JSONObject(message)));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
+                break;
             case MOVEMENT:
+                tanks.put(data.get("username").toString(), data);
                 sessions.stream().filter(Session::isOpen).forEach(sess -> {
                     try {
                         sess.getRemote().sendString(message);
@@ -113,6 +116,8 @@ public class SimpleWebSocket {
 
                     responce.put("action", "SCORE");
                     responce.put("score", String.valueOf(userScores));
+                    UserController.getUser(data.get("username").toString())
+                            .getSession().getRemote().sendString(String.valueOf(new JSONObject(responce)));
                     responce.clear();
                 } else {
                     responce.put("action", "HURT_YOU");
