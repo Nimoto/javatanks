@@ -84,7 +84,7 @@ class Tank {
                 break;
             case "0, -1" :
                 this.scheme = this.tankUp();
-                this.shoutPosition = this.shoutUp;
+                this.shoutPosition = this.shoutUp();
                 break;
             case "1, 0" :
                 this.scheme = this.tankRight();
@@ -92,11 +92,13 @@ class Tank {
                 break;
             case "-1, 0" :
                 this.scheme = this.tankLeft();
-                this.shoutPosition = this.shoutLeft;
+                this.shoutPosition = this.shoutLeft();
                 break;
         }
         this.direction = {x: direction.x, y: direction.y};
-        this.shoutDirection = {x: direction.x, y: direction.y};
+        if ((direction.x + direction.y) != 0) {
+            this.shoutDirection = {x: direction.x, y: direction.y};
+        }
         this.position.x = (position == false ? this.position.x + this.dx() * direction.x : position.x);
         this.position.y = (position == false ? this.position.y + this.dy() * direction.y : position.y);
         if (isDraw == true) {
@@ -109,7 +111,10 @@ class Tank {
     }
 
     shoutLeft() {
-        return {x: this.position.x - this.dx() * 2, y: this.position.y + this.dy()};
+        return {
+                    x: (this.position.x - this.dx() * 2),
+                    y: (this.position.y + this.dy() * 1)
+               };
     }
 
     tankRight() {
@@ -117,7 +122,7 @@ class Tank {
     }
 
     shoutRight() {
-        return {x: this.position.x + this.dx() * 4, y: this.position.y + this.dy()};
+        return {x: (this.position.x + this.dx() * 4), y: (this.position.y + this.dy())};
     }
 
     tankDown() {
@@ -125,7 +130,7 @@ class Tank {
     }
 
     shoutDown() {
-        return {x: this.position.x + this.dx(), y: this.position.y + this.dy() * 4};
+        return {x: (this.position.x + this.dx()), y: (this.position.y + this.dy() * 4)};
     }
 
     tankUp() {
@@ -133,6 +138,6 @@ class Tank {
     }
 
     shoutUp() {
-        return {x: this.position.x + this.dx(), y: this.position.y - this.dy() * 2};
+        return {x: (this.position.x + this.dx() * 1), y: (this.position.y - this.dy() * 2)};
     }
 }

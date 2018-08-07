@@ -4,9 +4,7 @@ class Shout {
         this.username = tank.username;
         this.x = tank.shoutPosition.x;
         this.y = tank.shoutPosition.y;
-        this.direction = {};
-        this.direction.x = tank.shoutDirection.x;
-        this.direction.y = tank.shoutDirection.y;
+        this.direction = tank.shoutDirection;
         this.context = this.context();
     }
 
