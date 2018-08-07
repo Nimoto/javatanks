@@ -1,13 +1,12 @@
 class Tank {
 
-    constructor(username, x = 300, y = 300) {
-        this.x = x;
-        this.y = y;
+    constructor(username, position = false) {
+        this.position = position == false ? {x: 300, y: 300} : position;
         this.username = username;
         this.scheme = this.tankUp();
         this.direction = {x: 0, y: -1};
         this.shoutDirection = {x: 0, y: -1};
-        this.shoutPosition = {x: 310, y: 290};
+        this.shoutPosition = this.shoutUp();
         this.isNew = true;
     }
 
@@ -33,7 +32,6 @@ class Tank {
     static changeStatus(tank) {
         window.setTimeout(function() {
             tank.isNew = false;
-            console.log(this.isNew);
         }, 3000);
     }
 
@@ -48,8 +46,8 @@ class Tank {
         var dx = this.dx(), dy = this.dy();
         for(var i = 0; i < 3; i++) {
             for(var j = 0; j < 3; j++) {
-                x = parseInt(this.x) + i * dx;
-                y = parseInt(this.y) + j * dy;
+                x = parseInt(this.position.x) + i * dx;
+                y = parseInt(this.position.y) + j * dy;
                 if (this.scheme[i][j] == 1) {
                   context.fillRect(x, y, (dx - 2), (dy - 2));
                   context.stroke();
@@ -65,8 +63,8 @@ class Tank {
         var dx = this.dx(), dy = this.dy();
         for(var i = 0; i < 3; i++) {
             for(var j = 0; j < 3; j++) {
-                x = parseInt(this.x) + i * dx;
-                y = parseInt(this.y) + j * dy;
+                x = parseInt(this.position.x) + i * dx;
+                y = parseInt(this.position.y) + j * dy;
                 if (this.scheme[i][j] == 1) {
                   context.clearRect(x, y, (dx - 2), (dy - 2));
                   context.stroke();
@@ -75,36 +73,32 @@ class Tank {
         }
     }
 
-    move(directionX, directionY, x = false, y = false, isDraw = true) {
+    move(direction, position, isDraw = true) {
         if (isDraw == true) {
             this.erase();
         }
-        switch (directionX + ", " + directionY) {
+        switch (direction.x + ", " + direction.y) {
             case "0, 1" :
                 this.scheme = this.tankDown();
-                this.shoutPosition = {x: this.x + this.dx(), y: this.y + this.dy() * 4};
-                this.shoutDirection = {x: directionX, y: directionY};
+                this.shoutPosition = this.shoutDown();
                 break;
             case "0, -1" :
                 this.scheme = this.tankUp();
-                this.shoutPosition = {x: this.x + this.dx(), y: this.y - this.dy() * 2};
-                this.shoutDirection = {x: directionX, y: directionY};
+                this.shoutPosition = this.shoutUp;
                 break;
             case "1, 0" :
                 this.scheme = this.tankRight();
-                this.shoutPosition = {x: this.x + this.dx() * 4, y: this.y + this.dy()};
-                this.shoutDirection = {x: directionX, y: directionY};
+                this.shoutPosition = this.shoutRight();
                 break;
             case "-1, 0" :
                 this.scheme = this.tankLeft();
-                this.shoutPosition = {x: this.x - this.dx() * 2, y: this.y + this.dy()};
-                this.shoutDirection = {x: directionX, y: directionY};
+                this.shoutPosition = this.shoutLeft;
                 break;
         }
-        this.direction.x = directionX;
-        this.direction.y = directionY;
-        x == false ? this.x = this.x + this.dx() * directionX : this.x = x;
-        y == false ? this.y = this.y + this.dy() * directionY : this.y = y;
+        this.direction = {x: direction.x, y: direction.y};
+        this.shoutDirection = {x: direction.x, y: direction.y};
+        this.position.x = (position == false ? this.position.x + this.dx() * direction.x : position.x);
+        this.position.y = (position == false ? this.position.y + this.dy() * direction.y : position.y);
         if (isDraw == true) {
             this.draw();
         }
@@ -114,15 +108,31 @@ class Tank {
         return [[0,1,0],[1,1,1],[1,0,1], [0,1,0]];
     }
 
+    shoutLeft() {
+        return {x: this.position.x - this.dx() * 2, y: this.position.y + this.dy()};
+    }
+
     tankRight() {
         return [[1,0,1],[1,1,1],[0,1,0], [2,1,0]];
+    }
+
+    shoutRight() {
+        return {x: this.position.x + this.dx() * 4, y: this.position.y + this.dy()};
     }
 
     tankDown() {
         return [[1,1,0],[0,1,1],[1,1,0], [1,2,0]];
     }
 
+    shoutDown() {
+        return {x: this.position.x + this.dx(), y: this.position.y + this.dy() * 4};
+    }
+
     tankUp() {
         return [[0,1,1],[1,1,0],[0,1,1], [1,0,0]];
+    }
+
+    shoutUp() {
+        return {x: this.position.x + this.dx(), y: this.position.y - this.dy() * 2};
     }
 }

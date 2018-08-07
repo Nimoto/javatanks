@@ -4,25 +4,26 @@ public class Tank {
 
     private int lifes = 5;
     private int score = 0;
-    private TankPosition position;
-    private TankPosition direction;
+    private Coordinates position;
+    private Coordinates direction;
     private int dx;
     private int dy;
     private String username;
 
     public Tank(String username) {
         this.username = username;
-        this.position = new TankPosition();
+        this.position = new Coordinates(300, 300);
         this.dx = 10;
         this.dy = 10;
-        this.direction = new TankPosition(0, 1);
+        this.direction = new Coordinates(0, -1);
     }
 
-    public void move(TankPosition direction) {
+    public void move(Coordinates direction) {
         int x = this.getPosition().getX() + this.dx * direction.getX();
         int y = this.getPosition().getY() + this.dy * direction.getY();
         this.getPosition().setX(x);
         this.getPosition().setY(y);
+        System.out.println(this.getPosition().getX() + " " + this.getPosition().getY());
     }
 
     public int getLifes() {
@@ -65,19 +66,19 @@ public class Tank {
         this.dy = dy;
     }
 
-    public void setPosition(TankPosition position) {
+    public void setPosition(Coordinates position) {
         this.position = position;
     }
 
-    public TankPosition getPosition() {
+    public Coordinates getPosition() {
         return position;
     }
 
-    public void setDirection(TankPosition direction) {
+    public void setDirection(Coordinates direction) {
         this.direction = direction;
     }
 
-    public TankPosition getDirection() {
+    public Coordinates getDirection() {
         return direction;
     }
 }

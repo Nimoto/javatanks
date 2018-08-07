@@ -12,7 +12,7 @@ class Service {
                 tanks = JSON.parse(data["tanks"]);
                 currentUsername = $("#login").val();
                 for (var key in tanks) {
-                    Service.addTank(tanks[key]["username"], tanks[key]["position"]["x"], tanks[key]["position"]["y"]);
+                    Service.addTank(tanks[key]["username"], tanks[key]["position"]);
                 }
 
                 $(".login-wrapper").hide();
@@ -29,14 +29,14 @@ class Service {
         case "MOVEMENT":
             var tank = JSON.parse(data["tank"]);
             var username = tank["username"];
-            tanks[username].move(tank["direction"]["x"], tank["direction"]["y"], tank["position"]["x"], tank["position"]["y"]);
+            tanks[username].move(tank["direction"], tank["position"]);
             if (currentUsername == username) {
                 $("body").scrollLeft(tanks[username]["x"] - 300);
                 $("body").scrollTop(tanks[username]["y"] - 300);
             }
             break;
         case "NEW_TANK":
-            Service.addNewTank(data["username"], data["x"], data["y"]);
+            Service.addNewTank(data["username"], {x: data["x"], y: data["y"]});
             break;
         case "SHOUT":
             if (currentUsername != data["username"]) {
@@ -60,14 +60,14 @@ class Service {
       }
     }
 
-    static addTank(username, x, y) {
-        tanks[username] = new Tank(username, x, y);
+    static addTank(username, position) {
+        tanks[username] = new Tank(username, position);
         tanks[username].setIsNew(false);
         tanks[username].draw();
     }
 
-    static addNewTank(username, startX, startY) {
-        tanks[username] = new Tank(username, startX, startY);
+    static addNewTank(username, position) {
+        tanks[username] = new Tank(username, position);
         Tank.changeStatus(tanks[username]);
         tanks[username].draw();
         var flag = false;
@@ -89,10 +89,10 @@ class Service {
 
     static pointInTank(point, tank) {
         if (
-            point.x >= tank.x &&
-            point.x <= (tank.x + 30) &&
-            point.y >= tank.y &&
-            point.y <= (tank.y + 30)
+            point.x >= tank.position.x &&
+            point.x <= (tank.position.x + 30) &&
+            point.y >= tank.position.y &&
+            point.y <= (tank.position.y + 30)
         ) {
             return tank.username;
         }
@@ -142,25 +142,25 @@ class Service {
         if (tanks[username]) {
             switch (keyCode) {
                 case 37:
-                    if (tanks[username].x > 0) {
+                    if (tanks[username].position.x > 0) {
                         dx = -1;
                         dy = 0;
                     }
                     break;
                 case 39:
-                    if (tanks[username].x < ($(".game-field").width() - 30)) {
+                    if (tanks[username].position.x < ($(".game-field").width() - 30)) {
                         dx = 1;
                         dy = 0;
                     }
                     break;
                 case 40:
-                    if (tanks[username].y < ($(".game-field").height() - 30)) {
+                    if (tanks[username].position.y < ($(".game-field").height() - 30)) {
                         dx = 0;
                         dy = 1;
                     }
                     break;
                 case 38:
-                    if (tanks[username].y > 0) {
+                    if (tanks[username].position.y > 0) {
                         dx = 0;
                         dy = -1;
                     }

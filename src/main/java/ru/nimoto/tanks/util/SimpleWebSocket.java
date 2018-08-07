@@ -100,7 +100,6 @@ public class SimpleWebSocket {
                     String jsonTank = gson.toJson(TankController.getTank(data.get("username").toString()));
                     responce.put("action", "MOVEMENT");
                     responce.put("tank", jsonTank);
-                    System.out.println(responce);
                     sessions.stream().filter(Session::isOpen).forEach(sess -> {
                         try {
                             sess.getRemote().sendString(String.valueOf(new JSONObject(responce)));

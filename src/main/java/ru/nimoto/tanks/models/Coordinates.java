@@ -1,15 +1,15 @@
 package ru.nimoto.tanks.models;
 
-public class TankPosition {
+public class Coordinates {
     int x;
     int y;
 
-    public TankPosition() {
+    public Coordinates() {
         this.x = 50;
         this.y = 50;
     }
 
-    public TankPosition(int x, int y) {
+    public Coordinates(int x, int y) {
         this.x = x;
         this.y = y;
     }
