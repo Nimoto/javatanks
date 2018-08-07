@@ -75,10 +75,7 @@ class Tank {
         }
     }
 
-    shoot() {
-    }
-
-    move(directionX, directionY, isDraw = true) {
+    move(directionX, directionY, x = false, y = false, isDraw = true) {
         if (isDraw == true) {
             this.erase();
         }
@@ -106,14 +103,11 @@ class Tank {
         }
         this.direction.x = directionX;
         this.direction.y = directionY;
-        this.x = this.x + this.dx() * directionX;
-        this.y = this.y + this.dy() * directionY;
+        x == false ? this.x = this.x + this.dx() * directionX : this.x = x;
+        y == false ? this.y = this.y + this.dy() * directionY : this.y = y;
         if (isDraw == true) {
             this.draw();
         }
-    }
-
-    die() {
     }
 
     tankLeft() {

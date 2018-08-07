@@ -7,6 +7,7 @@ public class User {
     private int score = 0;
     private final String userName;
     private Session session;
+    private Tank tank;
 
     public User(String userName) {
         this.userName = userName;
@@ -16,35 +17,19 @@ public class User {
         return userName;
     }
 
-    public int getLifes() {
-        return lifes;
-    }
-
-    public void setLifes(int lifes) {
-        this.lifes = lifes;
-    }
-
-    public void descrementLifes() {
-        this.lifes --;
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
-    }
-
-    public void incrementScore() {
-        this.score ++;
-    }
-
     public Session getSession() {
         return  session;
     }
 
     public void setSession(Session session) {
         this.session = session;
+    }
+
+    public void setTank(Tank tank) {
+        this.tank = tank;
+    }
+
+    public Tank getTank() {
+        return this.tank;
     }
 }

@@ -5,49 +5,38 @@ var currentUsername;
 class Service {
 
     static controller(data) {
-      console.log(data);
       switch (data["action"]) {
         case "AUTH":
             $(".incomingMessage").html("");
             if (data["status"] == "success") {
                 tanks = JSON.parse(data["tanks"]);
-                console.log(tanks);
-                $(".lifes").attr("data-badge", data["lifes"]);
-                $(".score").attr("data-badge", data["score"]);
                 currentUsername = $("#login").val();
                 for (var key in tanks) {
-                    Service.addTank(key, tanks[key]["x"], tanks[key]["y"]);
+                    Service.addTank(tanks[key]["username"], tanks[key]["position"]["x"], tanks[key]["position"]["y"]);
                 }
-                Service.addNewTank(currentUsername, true);
+
                 $(".login-wrapper").hide();
                 $(".game-field").show();
+
+                var responce = {};
+                responce.action = "NEW_TANK";
+                responce.username = currentUsername;
+                Socket.sendData(JSON.stringify(responce));
             } else {
                 $(".incomingMessage").html(data["message"]);
             }
             break;
-        case "TANK":
-            Service.addTank(data["username"], data["x"], data["y"]);
-            break;
         case "MOVEMENT":
-            if (currentUsername != data["username"]) {
-                if (!tanks[data["username"]]) {
-                    Service.addTank(data["username"], data["x"], data["y"]);
-                }
-                var dx = - tanks[data["username"]].x + data["x"];
-                if (dx != 0) {
-                    dx = dx / Math.abs(dx);
-                }
-                var dy = - tanks[data["username"]].y + data["y"];
-                if (dy != 0) {
-                    dy = dy / Math.abs(dy);
-                }
-                tanks[data["username"]].move(dx, dy);
+            var tank = JSON.parse(data["tank"]);
+            var username = tank["username"];
+            tanks[username].move(tank["direction"]["x"], tank["direction"]["y"], tank["position"]["x"], tank["position"]["y"]);
+            if (currentUsername == username) {
+                $("body").scrollLeft(tanks[username]["x"] - 300);
+                $("body").scrollTop(tanks[username]["y"] - 300);
             }
             break;
         case "NEW_TANK":
-            if (data["username"] != currentUsername) {
-                Service.addNewTank(data["username"], false, data["x"], data["y"]);
-            }
+            Service.addNewTank(data["username"], data["x"], data["y"]);
             break;
         case "SHOUT":
             if (currentUsername != data["username"]) {
@@ -77,28 +66,8 @@ class Service {
         tanks[username].draw();
     }
 
-    static addNewTank(username, isCurrent = false, startX = false, startY = false) {
-        if (startX != false && startY != false) {
-            tanks[username] = new Tank(username, startX, startY);
-        } else {
-            tanks[username] = new Tank(username);
-        }
-        if (isCurrent) {
-            var x = 50, y = 50;
-            while (!Service.isTanksIntersection(tanks[username]) && x < $(".game-field").width() - 50) {
-                y += tanks[username].dy();
-                if (y >= $(".game-field").height() - 50) {
-                    y = 50;
-                    x += tanks[username].dx();
-                }
-                tanks[username].x = x;
-                tanks[username].y = y;
-            }
-            var responce = tanks[username];
-            responce.action = "NEW_TANK";
-            Socket.sendData(JSON.stringify(responce));
-        }
-
+    static addNewTank(username, startX, startY) {
+        tanks[username] = new Tank(username, startX, startY);
         Tank.changeStatus(tanks[username]);
         tanks[username].draw();
         var flag = false;
@@ -130,29 +99,7 @@ class Service {
         return false;
     }
 
-    static isTanksIntersection(tank) {
-        var points = [
-            {x: tank.x,      y: tank.y},
-            {x: tank.x + 30, y: tank.y},
-            {x: tank.x + 30, y: tank.y + 30},
-            {x: tank.x,      y: tank.y + 30}
-        ];
-        var flag = true;
-        for (var key in tanks) {
-            var item = tanks[key];
-            if (item.username != tank.username) {
-                points.forEach(function(point, i, arr) {
-                    if (Service.pointInTank(point, item) == item.username && flag == true) {
-                        flag = false;
-                    }
-                });
-            }
-        }
-        return flag;
-    }
-
     static addShout(username) {
-        console.log("1");
         var tank = tanks[username];
         if (!tank.checkStatus()) {
             var shout = new Shout(tank);
@@ -163,7 +110,6 @@ class Service {
                 Socket.sendData(JSON.stringify(responce));
             }
             shout.interval = window.setInterval(function() {
-                console.log("2");
                 shout.move(shout.direction.x, shout.direction.y);
                 for (var key in tanks) {
                     if (!tanks[key].checkStatus() && Service.pointInTank({x: shout.x, y: shout.y}, tanks[key])) {
@@ -172,7 +118,6 @@ class Service {
                         if (key == currentUsername) {
                             var responce = {};
                             responce.action = "HURT";
-                            console.log("3");
                             responce.username = shout.username;
                             responce.victim = key;
                             Socket.sendData(JSON.stringify(responce));
@@ -225,19 +170,12 @@ class Service {
                     break;
             }
 
-            var tank = new Tank(username, tanks[username].x, tanks[username].y);
-            tank.move(dx, dy, false);
-            if (Service.isTanksIntersection(tank) == true) {
-                tanks[username].move(dx, dy);
-                $("body").scrollLeft(tanks[username].x - 300);
-                $("body").scrollTop(tanks[username].y - 300);
-                var responce = {};
-                responce.action = "MOVEMENT";
-                responce.username = username;
-                responce.x = tanks[username].x;
-                responce.y = tanks[username].y;
-                Socket.sendData(JSON.stringify(responce));
-            }
+             var responce = {};
+             responce.action = "MOVEMENT";
+             responce.username = username;
+             responce.dx = dx;
+             responce.dy = dy;
+             Socket.sendData(JSON.stringify(responce));
         }
     }
 }

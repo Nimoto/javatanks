@@ -1,6 +1,7 @@
 package ru.nimoto.tanks.controllers;
 
 import org.eclipse.jetty.websocket.api.Session;
+import ru.nimoto.tanks.models.Tank;
 import ru.nimoto.tanks.models.User;
 
 import java.util.HashMap;
@@ -34,17 +35,23 @@ public class UserController {
 
     public static int hurtUser(String userName) {
         if (users.get(userName) != null) {
-            users.get(userName).descrementLifes();
-            return users.get(userName).getLifes();
+            users.get(userName).getTank().descrementLifes();
+            return users.get(userName).getTank().getLifes();
         }
         return 0;
     }
 
     public static int scoreUser(String userName) {
         if (users.get(userName) != null) {
-            users.get(userName).incrementScore();
-            return users.get(userName).getScore();
+            users.get(userName).getTank().incrementScore();
+            return users.get(userName).getTank().getScore();
         }
         return 0;
+    }
+
+    public static void addTank(String userName, Tank tank) {
+        if (users.get(userName) != null) {
+            users.get(userName).setTank(tank);
+        }
     }
 }
